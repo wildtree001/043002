@@ -1,5 +1,5 @@
 <template>
-  <header class="top-container">
+  <header class="top-container" :class="[themeClassName]">
 		<div class="top-bar clearfix">
 			<div class="topbar-nav">
 				<ul class="nav-wrap">
@@ -19,23 +19,10 @@
 				<span class="nav-separate" v-show="$index !== 8">|</span>
 				<a href="https://account.xiaomi.com/pass/register">注册</a>
 			</div>
-			<div class="topbar-cart fa cart-arrow-down"
-        @mouseenter="evtCartEnter"
-        @mouseleave="evtCartOut">
-				<div class="cart"
-          :class="{'active': cartStatus}">
-					<i class="fa fa-cart-arrow-down icon-cart"></i>
-					<a href="http://static.mi.com/cart/">
-						购物车(
-						<span>0<span>
-							)
-					</a>
-				</div>
-				<div class="cart-list"
-          transition="fadein"
-          v-show="cartStatus">
-					购物车中还没有商品，赶快选购吧！
-				</div>
+			
+			<div class="right-controls">
+				<theme-manager></theme-manager>
+				<shopping-cart></shopping-cart>
 			</div>
 
 		</div>
@@ -43,6 +30,9 @@
 </template>
 
 <script>
+import ShoppingCart from './ShoppingCart'
+import ThemeManager from './ThemeManager'
+
 export default {
 	data () {
 		return {
@@ -57,25 +47,28 @@ export default {
 				{name: '问题反馈', sourceUrl: 'http://static.mi.com/feedback/'},
 				{name: 'Select Region', sourceUrl: 'http://www.mi.com/index.html'}
 			],
-			timer: '',
-			cartStatus: false
+			currentTheme: 'orange'
 		}
 	},
+  computed: {
+    themeClassName: function () {
+      return 'theme-' + this.currentTheme
+    }
+  },
   ready () {
+    this.listenThemeChange()
   },
 	methods: {
-		evtCartEnter: function () {
-      this.cartStatus = true
-      clearInterval(this.timer)
-		},
-    evtCartOut: function () {
-      let self = this
-      this.timer = setTimeout(function () {
-        self.cartStatus = false
-      }, 300)
+    listenThemeChange () {
+      const self = this
+      this.$on('themeChanged', function (themeId) {
+        self.currentTheme = themeId
+      })
     }
 	},
 	components: {
+		'shopping-cart': ShoppingCart,
+		'theme-manager': ThemeManager
 	}
 }
 </script>
@@ -135,7 +128,7 @@ export default {
 .topbar-info {
 	position: absolute;
 	top: 0;
-	right: 140px;
+	right: 260px;
 	height: 40px;
 	line-height: 40px;
 	a {
@@ -150,71 +143,13 @@ export default {
 	}
 }
 
-.topbar-cart {
-	position: relative;
-	float: right;
-	width: 120px;
-	background: #424242;
-	height: 40px;
-	line-height: 40px;
-	cursor: pointer;
-  &:hover {
-    background: #fff;
-    a, .icon-cart, span {
-      color: #ff6700;
-    }
-  }
-	.active {
-		background: #fff;
-    a {
-      color: #ff6700;
-    }
-    span {
-      color: #ff6700;
-    }
-	}
-	a {
-		display: block;
-    width: 100%;
-    height: 100%;
-		padding-left: 40px;
-		color: #b0b0b0;
-		text-decoration: none;
-    box-sizing: border-box;
-	}
-	span {
-		color: #b0b0b0;
-	}
-  .icon-cart {
-    position: absolute;
-    left: 15px;
-    top: 10px;
-    color: #b0b0b0;
-    font-size: 20px;
-  }
-}
-
-.cart-list {
+.right-controls {
 	position: absolute;
+	top: 0;
 	right: 0;
-	top: 39px;
-  width: 316px;
-  height: 96px;
-  line-height: 96px;
-	text-align: center;
-	color: #b0b0b0;
-	background: #fff;
-	box-shadow: 0 0 5px #ccc;
-  z-index: 10;
-  overflow: hidden;
-}
-
-.fadein-transition {
-  transition: all .5s ease;
-  height: 96px;
-}
-
-.fadein-enter, .fadein-leave {
-  height: 0;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 40px;
 }
 </style>
