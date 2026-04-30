@@ -146,6 +146,7 @@ export default {
       showNewFeatures: true,
       activeTab: '3d',
       currentTheme: 'orange',
+      cartItems: [],
       demoProducts: [
         {id: 201, title: '小米移动电源 10000mAh', price: '79', imgUrl: '//i2.mifile.cn/a1/T12HJvByEv1RXrhCrK.jpg?width=150&height=150'},
         {id: 202, title: '小米圈铁耳机', price: '99', imgUrl: '//i2.mifile.cn/a1/T1ycK_BjYv1RXrhCrK.jpg?width=150&height=150'},
@@ -169,6 +170,7 @@ export default {
   ready () {
     this.recivePlayVideo()
     this.listenThemeChange()
+    this.listenCartEvents()
   },
   methods: {
     recivePlayVideo () {
@@ -180,7 +182,55 @@ export default {
       var self = this
       this.$on('themeChanged', function (themeId) {
         self.currentTheme = themeId
+        self.$broadcast('themeChange', themeId)
       })
+    },
+    listenCartEvents () {
+      var self = this
+      this.$on('addToCart', function (item) {
+        self.doAddToCart(item)
+      })
+      this.$on('removeFromCart', function (index) {
+        self.doRemoveFromCart(index)
+      })
+    },
+    doAddToCart: function (item) {
+      var existingIndex = -1
+      for (var i = 0; i < this.cartItems.length; i++) {
+        if (this.cartItems[i].id === item.id) {
+          existingIndex = i
+          break
+        }
+      }
+      
+      if (existingIndex >= 0) {
+        this.cartItems[existingIndex].quantity++
+      } else {
+        var newItem = {}
+        for (var key in item) {
+          newItem[key] = item[key]
+        }
+        newItem.quantity = item.quantity || 1
+        newItem.imgUrl = newItem.imgUrl || '//i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg'
+        newItem.priceHistory = {
+          low: (parseFloat(item.price) * 0.85).toFixed(2),
+          high: (parseFloat(item.price) * 1.2).toFixed(2),
+          avg: (parseFloat(item.price) * 0.95).toFixed(2),
+          trend: 'stable'
+        }
+        this.cartItems.push(newItem)
+      }
+      
+      this.broadcastCartUpdate()
+    },
+    doRemoveFromCart: function (index) {
+      if (index >= 0 && index < this.cartItems.length) {
+        this.cartItems.splice(index, 1)
+        this.broadcastCartUpdate()
+      }
+    },
+    broadcastCartUpdate: function () {
+      this.$broadcast('cartItemsUpdated', this.cartItems)
     },
     handleDragStart (e, product) {
       e.dataTransfer.effectAllowed = 'copy'
@@ -198,7 +248,7 @@ export default {
         item[key] = product[key]
       }
       item.quantity = 1
-      this.$broadcast('addToCart', item)
+      this.doAddToCart(item)
     },
     switchTheme (themeId) {
       this.currentTheme = themeId

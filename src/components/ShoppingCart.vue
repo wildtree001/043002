@@ -317,13 +317,19 @@ export default {
     }
   },
   ready () {
+    var self = this
     this.generateRecommendations()
     this.generatePackages()
-    this.$on('themeChange', (theme) => {
-      this.currentTheme = theme
+    this.$on('themeChange', function (theme) {
+      self.currentTheme = theme
     })
-    this.$on('addToCart', (item) => {
-      this.addToCart(item)
+    this.$on('cartItemsUpdated', function (items) {
+      self.cartItems = items
+      self.generateRecommendations()
+      self.generatePackages()
+    })
+    this.$on('addToCart', function (item) {
+      self.$dispatch('addToCart', item)
     })
   },
   methods: {
@@ -341,40 +347,10 @@ export default {
       this.isPanelVisible = !this.isPanelVisible
     },
     addToCart (item) {
-      var existingIndex = -1
-      for (var i = 0; i < this.cartItems.length; i++) {
-        if (this.cartItems[i].id === item.id) {
-          existingIndex = i
-          break
-        }
-      }
-
-      if (existingIndex >= 0) {
-        this.cartItems[existingIndex].quantity++
-      } else {
-        var newItem = {}
-        for (var key in item) {
-          newItem[key] = item[key]
-        }
-        newItem.quantity = item.quantity || 1
-        newItem.imgUrl = newItem.imgUrl || '//i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg'
-        newItem.priceHistory = {
-          low: (parseFloat(item.price) * 0.85).toFixed(2),
-          high: (parseFloat(item.price) * 1.2).toFixed(2),
-          avg: (parseFloat(item.price) * 0.95).toFixed(2),
-          trend: 'stable'
-        }
-        this.cartItems.push(newItem)
-      }
-
-
-      this.generateRecommendations()
-      this.generatePackages()
+      this.$dispatch('addToCart', item)
     },
     removeItem (index) {
-      this.cartItems.splice(index, 1)
-      this.generateRecommendations()
-      this.generatePackages()
+      this.$dispatch('removeFromCart', index)
     },
     increaseQuantity (item) {
       item.quantity++

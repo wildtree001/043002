@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-cart-wrapper">
+  <div class="floating-cart-wrapper" :class="themeClassName">
     <div 
       class="floating-cart"
       :class="{'is-dragging-over': isDraggingOver}"
@@ -63,7 +63,7 @@
                   <stop offset="0%" :style="{stopColor: chartLineColor}"></stop>
                   <stop offset="100%" :style="{stopColor: chartLineColor, stopOpacity: 0.5}"></stop>
                 </linearGradient>
-                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" :style="{stopColor: chartLineColor, stopOpacity: 0.3}"></stop>
                   <stop offset="100%" :style="{stopColor: chartLineColor, stopOpacity: 0}"></stop>
                 </linearGradient>
@@ -136,10 +136,14 @@ export default {
       draggedItem: null,
       chartWidth: 260,
       chartHeight: 120,
-      priceHistoryData: [1999, 1899, 1799, 1849, 1799, 1899, 1949]
+      priceHistoryData: [1999, 1899, 1799, 1849, 1799, 1899, 1949],
+      currentTheme: 'orange'
     }
   },
   computed: {
+    themeClassName: function () {
+      return 'theme-' + this.currentTheme
+    },
     totalItems: function () {
       var total = 0
       for (var i = 0; i < this.cartItems.length; i++) {
@@ -155,7 +159,14 @@ export default {
       return total.toFixed(2)
     },
     chartLineColor: function () {
-      return '#ff6700'
+      var colors = {
+        orange: '#ff6700',
+        dark: '#64b5f6',
+        pink: '#ff69b4',
+        blue: '#2196f3',
+        green: '#4caf50'
+      }
+      return colors[this.currentTheme] || '#ff6700'
     },
     chartPoints: function () {
       if (!this.priceHistoryData || this.priceHistoryData.length === 0) return ''
@@ -201,8 +212,14 @@ export default {
   },
   ready () {
     var self = this
+    this.$on('themeChange', function (themeId) {
+      self.currentTheme = themeId
+    })
+    this.$on('cartItemsUpdated', function (items) {
+      self.cartItems = items
+    })
     this.$on('addToCart', function (item) {
-      self.addToCart(item)
+      self.$dispatch('addToCart', item)
     })
   },
   methods: {
@@ -224,37 +241,17 @@ export default {
       try {
         var data = JSON.parse(e.dataTransfer.getData('text/plain'))
         if (data && data.title && data.price) {
-          this.addToCart(data)
+          this.$dispatch('addToCart', data)
         }
       } catch (err) {
         console.log('Drop data parse error:', err)
       }
     },
     addToCart: function (item) {
-      var existingIndex = -1
-      for (var i = 0; i < this.cartItems.length; i++) {
-        if (this.cartItems[i].id === item.id) {
-          existingIndex = i
-          break
-        }
-      }
-      
-      if (existingIndex >= 0) {
-        this.cartItems[existingIndex].quantity++
-      } else {
-        var newItem = {}
-        for (var key in item) {
-          newItem[key] = item[key]
-        }
-        newItem.quantity = item.quantity || 1
-        newItem.imgUrl = newItem.imgUrl || '//i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg'
-        this.cartItems.push(newItem)
-      }
-      
-      this.$dispatch('cartUpdated', this.cartItems)
+      this.$dispatch('addToCart', item)
     },
     removeItem: function (index) {
-      this.cartItems.splice(index, 1)
+      this.$dispatch('removeFromCart', index)
     },
     handleItemDragStart: function (e, item) {
       this.draggedItem = item
