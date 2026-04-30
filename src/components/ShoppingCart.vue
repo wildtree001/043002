@@ -357,6 +357,7 @@ export default {
           newItem[key] = item[key]
         }
         newItem.quantity = item.quantity || 1
+        newItem.imgUrl = newItem.imgUrl || '//i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg'
         newItem.priceHistory = {
           low: (parseFloat(item.price) * 0.85).toFixed(2),
           high: (parseFloat(item.price) * 1.2).toFixed(2),
@@ -384,7 +385,7 @@ export default {
       }
     },
     generateRecommendations () {
-      const allProducts = [
+      var allProducts = [
         {id: 101, title: '小米移动电源 10000mAh', price: '79', imgUrl: '//i2.mifile.cn/a1/T12HJvByEv1RXrhCrK.jpg?width=150&height=150', category: 'power'},
         {id: 102, title: '小米圈铁耳机', price: '99', imgUrl: '//i2.mifile.cn/a1/T1ycK_BjYv1RXrhCrK.jpg?width=150&height=150', category: 'audio'},
         {id: 103, title: '小米手环2', price: '149', imgUrl: '//i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg', category: 'wearable'},
@@ -394,17 +395,40 @@ export default {
       ]
 
 
-      const cartCategories = this.cartItems.map(i => i.category || 'other')
+      var cartCategories = []
+      for (var c = 0; c < this.cartItems.length; c++) {
+        var cat = this.cartItems[c].category || 'other'
+        if (cartCategories.indexOf(cat) === -1) {
+          cartCategories.push(cat)
+        }
+      }
 
 
-      this.recommendations = allProducts
-        .filter(p => !this.cartItems.find(i => i.id === p.id))
-        .sort((a, b) => {
-          const aMatch = cartCategories.includes(a.category) ? 0 : 1
-          const bMatch = cartCategories.includes(b.category) ? 0 : 1
-          return aMatch - bMatch
-        })
-        .slice(0, 4)
+      var filtered = []
+      for (var p = 0; p < allProducts.length; p++) {
+        var product = allProducts[p]
+        var isInCart = false
+        for (var ci = 0; ci < this.cartItems.length; ci++) {
+          if (this.cartItems[ci].id === product.id) {
+            isInCart = true
+            break
+          }
+        }
+        if (!isInCart) {
+          filtered.push(product)
+        }
+      }
+
+
+      var self = this
+      filtered.sort(function (a, b) {
+        var aMatch = cartCategories.indexOf(a.category) >= 0 ? 0 : 1
+        var bMatch = cartCategories.indexOf(b.category) >= 0 ? 0 : 1
+        return aMatch - bMatch
+      })
+
+
+      self.recommendations = filtered.slice(0, 4)
     },
     generatePackages () {
       if (this.cartItems.length < 2) {
@@ -596,6 +620,7 @@ export default {
   display: flex;
   flex-direction: column;
   max-height: 600px;
+  overflow-y: auto;
 }
 
 .cart-header {

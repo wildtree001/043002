@@ -71,14 +71,14 @@ export default {
       type: Array,
       default: function () {
         return [
-          'http://i3.mifile.cn/a4/124d82cc-cfce-44ab-b711-28b21be81683',
-          'http://i3.mifile.cn/a4/2b69b930-a2fd-4d09-a46a-8690cb79f764',
-          'http://i1.mifile.cn/a1/pms_1464615180.86261317!220x220.jpg',
-          'http://i3.mifile.cn/a4/T1zTK_Bbhv1RXrhCrK.jpg',
-          'http://i1.mifile.cn/a1/T17FCQByWv1RXrhCrK!220x220.jpg',
-          'http://i1.mifile.cn/a1/T1OVC_ByY_1RXrhCrK!220x220.jpg',
-          'http://i1.mifile.cn/a1/pms_1470730028.12443689!220x220.jpg',
-          'http://i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg'
+          '//i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg',
+          '//i1.mifile.cn/a1/T1OVC_ByY_1RXrhCrK!220x220.jpg',
+          '//i1.mifile.cn/a1/T17FCQByWv1RXrhCrK!220x220.jpg',
+          '//i3.mifile.cn/a4/T1zTK_Bbhv1RXrhCrK.jpg',
+          '//i1.mifile.cn/a1/pms_1464615180.86261317!220x220.jpg',
+          '//i1.mifile.cn/a1/pms_1470730028.12443689!220x220.jpg',
+          '//i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg',
+          '//i1.mifile.cn/a1/T1OVC_ByY_1RXrhCrK!220x220.jpg'
         ]
       }
     },

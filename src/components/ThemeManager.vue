@@ -242,13 +242,21 @@ export default {
     this.loadSavedTheme()
   },
   methods: {
+    findThemeById: function (themeId) {
+      for (var i = 0; i < this.presetThemes.length; i++) {
+        if (this.presetThemes[i].id === themeId) {
+          return this.presetThemes[i]
+        }
+      }
+      return null
+    },
     togglePanel () {
       this.isPanelVisible = !this.isPanelVisible
     },
     startPreview (themeId) {
       if (this.enableAnimation) {
         this.previewTheme = themeId
-        const theme = this.presetThemes.find(t => t.id === themeId)
+        var theme = this.findThemeById(themeId)
         if (theme) {
           this.$broadcast('themeChange', themeId)
         }
@@ -263,7 +271,7 @@ export default {
     selectTheme (themeId) {
       if (themeId === this.currentTheme) return
       
-      const theme = this.presetThemes.find(t => t.id === themeId)
+      var theme = this.findThemeById(themeId)
       if (!theme) return
       
       if (this.enableAnimation) {
@@ -273,8 +281,8 @@ export default {
       }
     },
     playThemeTransition (themeId) {
-      const currentThemeObj = this.presetThemes.find(t => t.id === this.currentTheme)
-      const newThemeObj = this.presetThemes.find(t => t.id === themeId)
+      var currentThemeObj = this.findThemeById(this.currentTheme)
+      var newThemeObj = this.findThemeById(themeId)
       
       this.transitionFromColor = currentThemeObj ? currentThemeObj.colors.primary : '#ff6700'
       this.transitionToColor = newThemeObj ? newThemeObj.colors.primary : '#ff6700'
@@ -316,7 +324,7 @@ export default {
       this.$broadcast('themeChange', themeId)
       this.$dispatch('themeChanged', themeId)
       
-      const theme = this.presetThemes.find(t => t.id === themeId)
+      var theme = this.findThemeById(themeId)
       if (theme) {
         this.customPrimary = theme.colors.primary
         this.customBackground = theme.colors.background
@@ -358,7 +366,7 @@ export default {
       this.selectTheme(customThemeId)
     },
     resetCustomTheme () {
-      const theme = this.presetThemes.find(t => t.id === this.currentTheme)
+      var theme = this.findThemeById(this.currentTheme)
       if (theme) {
         this.customPrimary = theme.colors.primary
         this.customBackground = theme.colors.background

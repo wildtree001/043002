@@ -69,21 +69,22 @@
             </ul>
           </div>
           <div class="shopping-cart-demo">
-            <p class="demo-hint">购物车功能已集成到顶部导航栏，点击右上角购物车图标查看</p>
+            <p class="demo-hint">拖拽商品到右侧悬浮购物车添加，或点击顶部/悬浮购物车图标查看</p>
             <div class="demo-products">
               <div 
                 v-for="product in demoProducts"
                 :key="product.id"
-                class="demo-product"
+                class="demo-product draggable-product"
+                draggable="true"
+                @dragstart="handleDragStart($event, product)"
                 @click="addDemoProduct(product)"
               >
                 <img :src="product.imgUrl" :alt="product.title" />
                 <h5>{{product.title}}</h5>
                 <p class="price">¥{{product.price}}</p>
-                <button class="add-to-cart-btn">
-                  <i class="fa fa-plus"></i>
-                  添加购物车
-                </button>
+                <div class="drag-hint">
+                  <i class="fa fa-arrows"></i> 拖拽添加
+                </div>
               </div>
             </div>
           </div>
@@ -123,6 +124,7 @@
     <goods></goods>
     <temp-footer></temp-footer>
     <play-video :play-config="playConfig"></play-video>
+    <floating-cart></floating-cart>
   </div>
 </template>
 
@@ -135,6 +137,7 @@ import Goods from './components/Goods'
 import TempFooter from './components/TempFooter'
 import PlayVideo from './components/common/PlayVideo'
 import Product3DViewer from './components/Product3DViewer'
+import FloatingCart from './components/FloatingCart'
 
 export default {
   data () {
@@ -174,10 +177,20 @@ export default {
       })
     },
     listenThemeChange () {
-      const self = this
+      var self = this
       this.$on('themeChanged', function (themeId) {
         self.currentTheme = themeId
       })
+    },
+    handleDragStart (e, product) {
+      e.dataTransfer.effectAllowed = 'copy'
+      e.dataTransfer.setData('text/plain', JSON.stringify({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        imgUrl: product.imgUrl,
+        quantity: 1
+      }))
     },
     addDemoProduct (product) {
       var item = {}
@@ -200,7 +213,8 @@ export default {
     'goods': Goods,
     'temp-footer': TempFooter,
     'play-video': PlayVideo,
-    'product-3d-viewer': Product3DViewer
+    'product-3d-viewer': Product3DViewer,
+    'floating-cart': FloatingCart
   }
 }
 </script>
@@ -382,26 +396,30 @@ export default {
 }
 
 .demo-product .price {
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 600;
   color: #ff6700;
 }
 
-.add-to-cart-btn {
-  width: 100%;
-  padding: 8px;
-  background: #ff6700;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+.drag-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #999;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  border-radius: 12px;
 }
 
-.add-to-cart-btn:hover {
-  background: #ff8c00;
+.draggable-product {
+  cursor: grab;
+}
+
+.draggable-product:active {
+  cursor: grabbing;
 }
 
 .theme-preview-grid {
