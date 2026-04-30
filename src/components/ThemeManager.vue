@@ -239,7 +239,18 @@ export default {
     }
   },
   ready () {
+    var self = this
     this.loadSavedTheme()
+    this.$on('themeChange', function (themeId) {
+      if (self.previewTheme) return
+      self.currentTheme = themeId
+      var theme = self.findThemeById(themeId)
+      if (theme) {
+        self.customPrimary = theme.colors.primary
+        self.customBackground = theme.colors.background
+        self.customText = theme.colors.text
+      }
+    })
   },
   methods: {
     findThemeById: function (themeId) {

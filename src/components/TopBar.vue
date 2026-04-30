@@ -60,9 +60,14 @@ export default {
   },
 	methods: {
     listenThemeChange () {
-      const self = this
+      var self = this
       this.$on('themeChanged', function (themeId) {
         self.currentTheme = themeId
+        self.$broadcast('themeChange', themeId)
+      })
+      this.$on('themeChange', function (themeId) {
+        self.currentTheme = themeId
+        self.$broadcast('themeChange', themeId)
       })
     }
 	},
